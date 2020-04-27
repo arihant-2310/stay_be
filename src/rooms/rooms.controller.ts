@@ -18,6 +18,8 @@ const config = {
     secretAccessKey: '',
 }
 const AWS_S3_BUCKET_NAME = '';
+const S3Client = new S3(config);
+
 
 @ApiUseTags('Rooms Management')
 @Controller('api/v1/rooms')
