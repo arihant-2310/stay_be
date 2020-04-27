@@ -1,4 +1,4 @@
-import { Controller, Get ,Post, Body,Param, Delete,Patch,Query, ValidationPipe, UsePipes, ParseIntPipe,UseGuards, Req} from '@nestjs/common';
+import { Controller, Get ,Post, Body,Param, Delete,Patch,Query, ValidationPipe, UsePipes, ParseIntPipe,UseGuards, Req, UseInterceptors, UploadedFiles } from '@nestjs/common';
 import {RoomsService} from './rooms.service';
 import {CreateRoomDto} from './dto/create-room.dto';
 import { GetRoomsFilterDto } from './dto/get-room-filter';
@@ -9,7 +9,7 @@ import { ApiUseTags,ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import * as multerS3 from 'multer-s3';
-import S3 from 'aws-s3';
+const S3Client = require('aws-s3');
 
 const config = {
     bucketName: '',
@@ -18,7 +18,7 @@ const config = {
     secretAccessKey: '',
 }
 const AWS_S3_BUCKET_NAME = '';
-const S3Client = new S3(config);
+const S3 = new S3Client(config);
 
 
 @ApiUseTags('Rooms Management')
@@ -43,7 +43,7 @@ export class RoomsController {
     @UseInterceptors(
       FilesInterceptor('file',5,{
       storage: multerS3({
-        s3: S3Client,
+        s3: S3,
         bucket: AWS_S3_BUCKET_NAME,
         acl: 'public-read',
         key: function(request, file, cb) {
