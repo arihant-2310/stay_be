@@ -7,6 +7,17 @@ import { Room } from './entity/room.entity';
 import { RoomStatus } from './room-status.enum';
 import { ApiUseTags,ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import * as multerS3 from 'multer-s3';
+import S3 from 'aws-s3';
+
+const config = {
+    bucketName: '',
+    region: '',
+    accessKeyId: '',
+    secretAccessKey: '',
+}
+const AWS_S3_BUCKET_NAME = '';
 
 @ApiUseTags('Rooms Management')
 @Controller('api/v1/rooms')
@@ -27,14 +38,32 @@ export class RoomsController {
     @UseGuards(AuthGuard('jwt'))
     @Post('/:hotelid')
     @UsePipes(ValidationPipe)
-
-        createRoom(
-            @Req() req:any,
+    @UseInterceptors(
+      FilesInterceptor('file',5,{
+      storage: multerS3({
+        s3: S3Client,
+        bucket: AWS_S3_BUCKET_NAME,
+        acl: 'public-read',
+        key: function(request, file, cb) {
+          cb(null, `${Date.now().toString()} - ${file.originalname}`);
+        },
+      }),
+    //   fileFilter: imageFileFilter,
+    }),
+    )
+    createRoom(
+        @Req() req:any,
         @Param('hotelid') id:number,
+        @UploadedFiles() file,
         @Body() createRoomDto : CreateRoomDto,
     ):Promise<Room>
-    {
-        return this.roomsService.createRoom(req.user,createRoomDto,id);  
+    {   
+//      S3Client
+//     .uploadFile(file,req.files)
+//     .then(data => console.log(data))
+//     .catch(err => console.error(err))
+	console.log(req.files);
+        return this.roomsService.createRoom(req.user,createRoomDto,id,req.files);  
     }
 
     @ApiBearerAuth()
