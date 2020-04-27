@@ -65,7 +65,7 @@ export class RoomsController {
 //     .then(data => console.log(data))
 //     .catch(err => console.error(err))
 	console.log(req.files);
-        return this.roomsService.createRoom(req.user,createRoomDto,id,req.files);  
+        return this.roomsService.createRoom(req.user,createRoomDto,id);  
     }
 
     @ApiBearerAuth()
